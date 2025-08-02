@@ -1,8 +1,16 @@
-name: Deploy to Coolify
+name: Manual Deploy to Coolify
 
 on:
-  push:
-    branches: [main]
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Which branch to deploy?'
+        required: true
+        default: 'main'
+        type: choice
+        options:
+          - main
+          - main2
 
 jobs:
   deploy:
@@ -11,22 +19,22 @@ jobs:
     steps:
       - name: Trigger Coolify Deployment
         run: |
-          echo "Triggering deployment on Coolify..."
+          echo "Deploying branch: ${{ github.event.inputs.branch }}"
 
-          # Run curl and save both body and status code
-          http_response=$(mktemp)
-          http_code=$(curl -s -w "%{http_code}" -o "$http_response" \
+          response=$(curl -s -w "%{http_code}" -o coolify_response.json \
             -X POST https://www.q-solutions.pk/api/v1/deploy \
             -H "Authorization: Bearer ${{ secrets.COOLIFY_API_KEY }}" \
             -H "Content-Type: application/json" \
-            -d '{"uuid": "jgwswck8cwkock48c8w80k0c"}')
+            -d '{
+              uuid": "jgwswck8cwkock48c8w80k0c",
+              "branch": "${{ github.event.inputs.branch }}"
+            }')
 
-          echo "Coolify API response code: $http_code"
+          echo "Coolify API response code: $response"
           echo "Coolify API response body:"
-          cat "$http_response"
+          cat coolify_response.json
 
-          # Exit if status code is not 200
-          if [ "$http_code" -ne 200 ]; then
-            echo "❌ Deployment trigger failed with status $http_code"
+          if [ "$response" -ne 200 ]; then
+            echo "❌ Deployment trigger failed with status $response"
             exit 1
           fi
