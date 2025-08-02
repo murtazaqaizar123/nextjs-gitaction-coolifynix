@@ -1,4 +1,4 @@
-name: Deploy to Coolify (Custom Domain)
+name: Deploy to Coolify
 
 on:
   push:
@@ -13,17 +13,20 @@ jobs:
         run: |
           echo "Triggering deployment on Coolify..."
 
-          response=$(curl -s -w "%{http_code}" -o coolify_response.json \
-            -X POST curl https://www.q-solutions.pk/api/v1/deploy \
+          # Run curl and save both body and status code
+          http_response=$(mktemp)
+          http_code=$(curl -s -w "%{http_code}" -o "$http_response" \
+            -X POST https://www.q-solutions.pk/api/v1/deploy \
             -H "Authorization: Bearer ${{ secrets.COOLIFY_API_KEY }}" \
             -H "Content-Type: application/json" \
             -d '{"uuid": "jgwswck8cwkock48c8w80k0c"}')
 
-          echo "Coolify API response code: $response"
+          echo "Coolify API response code: $http_code"
           echo "Coolify API response body:"
-          cat coolify_response.json
+          cat "$http_response"
 
-          if [ "$response" -ne 200 ]; then
-            echo "❌ Deployment trigger failed with status $response"
+          # Exit if status code is not 200
+          if [ "$http_code" -ne 200 ]; then
+            echo "❌ Deployment trigger failed with status $http_code"
             exit 1
           fi
