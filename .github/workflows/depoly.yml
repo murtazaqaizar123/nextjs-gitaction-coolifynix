@@ -14,7 +14,7 @@ jobs:
           echo "Triggering deployment on Coolify..."
 
           response=$(curl -s -w "%{http_code}" -o coolify_response.json \
-            -X POST https://www.q-solutions.pk/api/v1/deploy \
+            -X POST curl https://www.q-solutions.pk/api/v1/apps \
             -H "Authorization: Bearer ${{ secrets.COOLIFY_API_KEY }}" \
             -H "Content-Type: application/json" \
             -d '{"uuid": "YOUR_APP_UUID"}')
