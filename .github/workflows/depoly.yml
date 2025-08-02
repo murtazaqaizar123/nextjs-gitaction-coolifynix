@@ -1,4 +1,4 @@
-name: Deploy to Coolify Cloud
+name: Deploy to Coolify (Custom Domain)
 
 on:
   push:
@@ -11,7 +11,19 @@ jobs:
     steps:
       - name: Trigger Coolify Deployment
         run: |
-          curl -X POST https://www.q-solutions.pk/api/v1/deploy \
+          echo "Triggering deployment on Coolify..."
+
+          response=$(curl -s -w "%{http_code}" -o coolify_response.json \
+            -X POST https://www.q-solutions.pk/api/v1/deploy \
             -H "Authorization: Bearer ${{ secrets.COOLIFY_API_KEY }}" \
             -H "Content-Type: application/json" \
-            -d '{"applicationId": "jgwswck8cwkock48c8w80k0c"}'
+            -d '{"applicationId": "YOUR_APP_UUID"}')
+
+          echo "Coolify API response code: $response"
+          echo "Coolify API response body:"
+          cat coolify_response.json
+
+          if [ "$response" -ne 200 ]; then
+            echo "Deployment trigger failed with status $response"
+            exit 1
+          fi
