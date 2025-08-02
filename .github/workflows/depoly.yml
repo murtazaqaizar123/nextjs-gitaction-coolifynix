@@ -11,7 +11,7 @@ jobs:
     steps:
       - name: Trigger Coolify Deployment
         run: |
-          curl -X POST https://app.coolify.io/api/v1/deploy \
+          curl -X POST https://www.q-solutions.pk/api/v1/deploy \
             -H "Authorization: Bearer ${{ secrets.COOLIFY_API_KEY }}" \
             -H "Content-Type: application/json" \
             -d '{"applicationId": "jgwswck8cwkock48c8w80k0c"}'
